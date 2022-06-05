@@ -140,6 +140,40 @@ class MemberCollection : IMemberCollection
         return false;
     }
 
+    // Find a given member in this member collection 
+    // Pre-condition: nil
+    // Post-condition: return the reference of the member object in the member collection, if this member is in the member collection; return null otherwise; member collection remains unchanged
+    public IMember Find(IMember member)
+    {
+        if (IsEmpty()) return null;
+
+        Member another = (Member)member;
+
+        int min = 0;
+        int max = count - 1;
+
+        while (min <= max)
+        {
+            int mid = (min + max) / 2;
+            int comparison = another.CompareTo(members[mid]);
+
+            if (comparison == 0)
+            {
+                return members[mid];
+            }
+            else if (comparison < 0)
+            {
+                max = mid - 1;
+            }
+            else
+            {
+                min = mid + 1;
+            }
+        }
+
+        return null;
+    }
+
     // Remove all the members in this member collection
     // Pre-condition: nil
     // Post-condition: no member in this member collection 
