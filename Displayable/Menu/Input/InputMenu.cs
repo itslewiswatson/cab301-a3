@@ -32,7 +32,10 @@ class InputMenu : Menu, Displayable<Input>
 
     private void PrintHeader()
     {
-        Console.WriteLine("{0}:", header);
+        if (header != null)
+        {
+            Console.WriteLine("{0}:", header);
+        }
         Console.WriteLine();
     }
 

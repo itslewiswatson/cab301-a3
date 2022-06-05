@@ -7,7 +7,7 @@ class RegisterMemberHandler : Handler
     {
     }
 
-    protected override void Execute(List<string> values)
+    protected override bool Execute(List<string> values)
     {
         string firstName = values[0];
         string lastName = values[1];
@@ -20,5 +20,7 @@ class RegisterMemberHandler : Handler
 
         Console.WriteLine(string.Format("You just added {0} {1} as a member", firstName, lastName));
         Console.WriteLine();
+
+        return true;
     }
 }

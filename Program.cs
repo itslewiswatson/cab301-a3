@@ -12,6 +12,7 @@ class Program
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
         RegisterMemberHandler registerMemberHandler = new RegisterMemberHandler(memberCollection, movieCollection);
+        MemberLoginHandler memberLoginHandler = new MemberLoginHandler(memberCollection, movieCollection);
 
         // Validators
         PinValidator pinValidator = new PinValidator();
@@ -24,6 +25,17 @@ class Program
         mainMenu.AddOption("Staff Login", staffLoginMenu);
         staffLoginMenu.AddInput("Username", new StaffUsernameValidator());
         staffLoginMenu.AddInput("Password", new StaffPasswordValidator());
+
+        InputMenu memberLoginMenu = mainMenu.AddInputMenu("MemberLogin", "Enter your membership credentials");
+        mainMenu.AddOption("Member Login", memberLoginMenu);
+        memberLoginMenu.AddInput("First Name");
+        memberLoginMenu.AddInput("Last Name");
+        memberLoginMenu.AddInput("PIN", pinValidator);
+
+        OptionMenu memberOptionMenu = new OptionMenu(mainMenu, "Select what you would like to do");
+
+        InputMenu memberGoToParentMenu = memberOptionMenu.AddInputMenu("GoToParentMenu", null);
+        memberOptionMenu.AddOption("Return to the main menu", memberGoToParentMenu);
 
         OptionMenu staffOptionMenu = new OptionMenu(mainMenu, "Select what you would like to do");
 
@@ -49,8 +61,9 @@ class Program
         InputMenu displayMembersRentingMenu = staffOptionMenu.AddInputMenu("DisplayMembersRenting", "Display all members who are currently renting a particular movie");
         staffOptionMenu.AddOption("Display all members who are currently renting a particular movie", displayMembersRentingMenu);
 
-        InputMenu goToParentMenu = staffOptionMenu.AddInputMenu("GoToParentMenu", "Return to the main menu");
-        staffOptionMenu.AddOption("Return to the main menu", goToParentMenu);
+        InputMenu staffGoToParentMenu = staffOptionMenu.AddInputMenu("GoToParentMenu", null);
+        staffOptionMenu.AddOption("Return to the main menu", staffGoToParentMenu);
+
 
         // Menu handling
         BasicDisplayable currentDisplay = mainMenu;
@@ -125,33 +138,30 @@ class Program
                 // Match current input menu to the appropriate handler
                 switch (currentMenu.id)
                 {
-                    case "StaffLogin":
-                        // We don't need to execute this line but we should because it performs validation we need
-                        // staffLoginHandler.Handle(fields, values);
-
-                        string username = values[0];
-                        string password = values[1];
-
-                        if (username == StaffLoginHandler.ACCEPTABLE_USERNAME && password == StaffLoginHandler.ACCEPTABLE_PASSWORD)
-                        {
-                            Console.WriteLine("Welcome, staff member :)");
-                            Console.WriteLine();
-                            currentDisplay = staffOptionMenu;
-                            break;
-                        }
-                        Console.WriteLine("Incorrect username or password");
-                        Console.WriteLine();
-                        currentDisplay = currentMenu.parentMenu;
+                    case "GoToParentMenu":
+                        currentDisplay = mainMenu;
                         break;
+
+                    case "StaffLogin":
+                        bool staffLoginSuccess = staffLoginHandler.Handle(fields, values);
+                        currentDisplay = staffLoginSuccess ? staffOptionMenu : currentMenu.parentMenu;
+                        break;
+
+                    case "MemberLogin":
+                        bool memberLoginSuccess = memberLoginHandler.Handle(fields, values);
+                        currentDisplay = memberLoginSuccess ? memberOptionMenu : currentMenu.parentMenu;
+                        break;
+
                     case "RegisterMember":
                         registerMemberHandler.Handle(fields, values);
                         currentDisplay = currentMenu.parentMenu;
                         break;
+                    
                     default:
                         Console.WriteLine("Something has gone wrong.");
                         Console.WriteLine();
                         currentDisplay = currentMenu.parentMenu;
-                    break;
+                        break;
                 }
 
                 // currentDisplay = currentMenu.parentMenu;

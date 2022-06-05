@@ -10,7 +10,7 @@ class StaffLoginHandler : Handler
     {
     }
 
-    protected override void Execute(List<string> values)
+    protected override bool Execute(List<string> values)
     {
         string username = values[0];
         string password = values[1];
@@ -18,12 +18,13 @@ class StaffLoginHandler : Handler
         if (username == ACCEPTABLE_USERNAME && password == ACCEPTABLE_PASSWORD)
         {
             Console.WriteLine("Welcome, staff member :)");
-        }
-        else
-        {
-            Console.WriteLine("Incorrect username or password");
+            Console.WriteLine();
+
+            return true;
         }
 
+        Console.WriteLine("Incorrect username or password");
         Console.WriteLine();
+        return false;
     }
 }

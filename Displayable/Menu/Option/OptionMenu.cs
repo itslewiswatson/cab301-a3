@@ -34,7 +34,10 @@ class OptionMenu : Menu, Displayable<Option>
 
     private void PrintOptionsHeader()
     {
-        Console.WriteLine("{0}:", header);
+        if (header != null)
+        {
+            Console.WriteLine("{0}:", header);
+        }
         Console.WriteLine();
     }
 

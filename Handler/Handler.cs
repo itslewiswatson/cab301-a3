@@ -12,19 +12,21 @@ abstract class Handler
         this.movieCollection = movieCollection;
     }
 
-    abstract protected void Execute(List<string> values);
+    abstract protected bool Execute(List<string> values);
 
-    public void Handle(List<Input> fields, List<string> values)
+    public bool Handle(List<Input> fields, List<string> values)
     {
         try
         {
             ValidateValues(fields, values);
-            Execute(values);
+            return Execute(values);
         }
         catch (Exception e)
         {
             PrintErrorMessage(e.Message);
         }
+
+        return false;
     }
 
     private void ValidateValues(List<Input> fields, List<string> values)
