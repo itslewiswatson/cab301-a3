@@ -9,14 +9,28 @@ class Program
         MemberCollection memberCollection = new MemberCollection(100);
         MovieCollection movieCollection = new MovieCollection();
 
+        Member lewis = new Member("Lewis", "Watson", "0404925759", "1234");
+        Member dennis = new Member("Ron", "Dennis", "0404925759", "1234");
+        memberCollection.Add(lewis);
+        memberCollection.Add(dennis);
+
+        Movie movie = new Movie("Casino", MovieGenre.Drama, MovieClassification.M15Plus, 200, 10);
+        // movie.AddBorrower(lewis);
+        movieCollection.Insert(movie);
+
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
         RegisterMemberHandler registerMemberHandler = new RegisterMemberHandler(memberCollection, movieCollection);
         MemberLoginHandler memberLoginHandler = new MemberLoginHandler(memberCollection, movieCollection);
+        RemoveMemberHandler removeMemberHandler = new RemoveMemberHandler(memberCollection, movieCollection);
+        DisplayMemberContactHandler displayMemberContactHandler = new DisplayMemberContactHandler(memberCollection, movieCollection);
+        DisplayMembersRentingHandler displayMembersRentingHandler = new DisplayMembersRentingHandler(memberCollection, movieCollection);
+        RemoveDvdHandler removeDvdHandler = new RemoveDvdHandler(memberCollection, movieCollection);
 
         // Validators
         PinValidator pinValidator = new PinValidator();
         ContactNumberValidator contactNumberValidator = new ContactNumberValidator();
+        QuantityValidator quantityValidator = new QuantityValidator();
 
         // Menus
         OptionMenu mainMenu = new OptionMenu("Enter a number to select from the list");
@@ -44,6 +58,8 @@ class Program
 
         InputMenu removeDvdMenu = staffOptionMenu.AddInputMenu("RemoveDVDs", "Remove DVDs of a movie from the system");
         staffOptionMenu.AddOption("Remove DVDs of a movie from the system", removeDvdMenu);
+        removeDvdMenu.AddInput("Movie");
+        removeDvdMenu.AddInput("Quantity", quantityValidator);
 
         InputMenu registerMemberMenu = staffOptionMenu.AddInputMenu("RegisterMember", "Register a new member with the system");
         staffOptionMenu.AddOption("Register a new member with the system", registerMemberMenu);
@@ -54,16 +70,20 @@ class Program
 
         InputMenu removeMemberMenu = staffOptionMenu.AddInputMenu("RemoveMember", "Remove a registered member from the system");
         staffOptionMenu.AddOption("Remove a registered member from the system", removeMemberMenu);
+        removeMemberMenu.AddInput("First Name");
+        removeMemberMenu.AddInput("Last Name");
 
         InputMenu displayContactMenu = staffOptionMenu.AddInputMenu("DisplayMemberContact", "Display a member's contact phone number, given their name");
         staffOptionMenu.AddOption("Display a member's contact phone number, given their name", displayContactMenu);
+        displayContactMenu.AddInput("First Name");
+        displayContactMenu.AddInput("Last Name");
 
         InputMenu displayMembersRentingMenu = staffOptionMenu.AddInputMenu("DisplayMembersRenting", "Display all members who are currently renting a particular movie");
         staffOptionMenu.AddOption("Display all members who are currently renting a particular movie", displayMembersRentingMenu);
+        displayMembersRentingMenu.AddInput("Movie");
 
         InputMenu staffGoToParentMenu = staffOptionMenu.AddInputMenu("GoToParentMenu", null);
         staffOptionMenu.AddOption("Return to the main menu", staffGoToParentMenu);
-
 
         // Menu handling
         BasicDisplayable currentDisplay = mainMenu;
@@ -156,7 +176,27 @@ class Program
                         registerMemberHandler.Handle(fields, values);
                         currentDisplay = currentMenu.parentMenu;
                         break;
-                    
+
+                    case "RemoveMember":
+                        removeMemberHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "DisplayMemberContact":
+                        displayMemberContactHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "DisplayMembersRenting":
+                        displayMembersRentingHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "RemoveDVDs":
+                        removeDvdHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
                     default:
                         Console.WriteLine("Something has gone wrong.");
                         Console.WriteLine();

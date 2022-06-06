@@ -263,7 +263,7 @@ public class MovieCollection : IMovieCollection
 	{
 		if (count == 0) return new IMovie[0];
 
-		IMovie[] movies = new IMovie[count + 1];
+		IMovie[] movies = new IMovie[count];
 
 		int i = 0;
 		Inorder(root, ref movies, ref i);
