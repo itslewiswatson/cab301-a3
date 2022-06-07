@@ -10,13 +10,13 @@ class QuantityValidator : InputValidator
         }
         catch (Exception)
         {
-            throw new InputInvalidException("Quantity must be a number");
+            throw new InputInvalidException("Must be a number");
         }
 
         int qty = int.Parse(input);
         if (qty <= 0)
         {
-            throw new InputInvalidException("Quantity must be greater than zero");
+            throw new InputInvalidException("Numbers must be greater than zero");
         }
     }
 }

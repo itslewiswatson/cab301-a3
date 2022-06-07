@@ -4,6 +4,6 @@
     {
         bool isValid = input == "staff";
 
-        if (!isValid) throw new InputInvalidException("Password is invalid");
+        if (!isValid) throw new InputInvalidException("Username is invalid");
     }
 }

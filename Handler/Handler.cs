@@ -29,7 +29,7 @@ abstract class Handler
         return false;
     }
 
-    private void ValidateValues(List<Input> fields, List<string> values)
+    public static void ValidateValues(List<Input> fields, List<string> values)
     {
         for (int index = 0; index < fields.Count; index++)
         {
@@ -44,7 +44,7 @@ abstract class Handler
         }
     }
 
-    private void PrintErrorMessage(string message)
+    public static void PrintErrorMessage(string message)
     {
         Console.WriteLine(message);
         Console.WriteLine();

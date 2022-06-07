@@ -12,20 +12,6 @@ class Program
         Member loggedInMember = null;
         string movieToAdd = null;
 
-        // ADTs
-
-
-        Member lewis = new Member("Lewis", "Watson", "0404925759", "1234");
-        Member dennis = new Member("Ron", "Dennis", "0404925759", "1234");
-        memberCollection.Add(lewis);
-        memberCollection.Add(dennis);
-
-        Movie casino = new Movie("Casino", MovieGenre.Drama, MovieClassification.M15Plus, 200, 10);
-        Movie gf = new Movie("Goodfellas", MovieGenre.Drama, MovieClassification.M15Plus, 210, 250);
-        // movie.AddBorrower(lewis);
-        movieCollection.Insert(casino);
-        movieCollection.Insert(gf);
-
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
         RegisterMemberHandler registerMemberHandler = new RegisterMemberHandler(memberCollection, movieCollection);
@@ -42,6 +28,8 @@ class Program
         PinValidator pinValidator = new PinValidator();
         ContactNumberValidator contactNumberValidator = new ContactNumberValidator();
         QuantityValidator quantityValidator = new QuantityValidator();
+        ClassificationValidator classificationValidator = new ClassificationValidator();
+        GenreValidator genreValidator = new GenreValidator();
 
         // Menus
         OptionMenu mainMenu = new OptionMenu("Enter a number to select from the list");
@@ -92,11 +80,10 @@ class Program
         addDvdMenu.AddInput("Movie");
 
         InputMenu addDvdFullMenu = addDvdMenu.AddInputMenu("AddDVDsFull", "We haven't seen that movie before, let's get some more info");
-        // staffOptionMenu.AddOption("HIDDEN: Add new DVDs of a new movie to the system", addDvdFullMenu, true);
-        addDvdFullMenu.AddInput("Genre");
-        addDvdFullMenu.AddInput("Classification");
-        addDvdFullMenu.AddInput("Duration");
-        addDvdFullMenu.AddInput("Copies");
+        addDvdFullMenu.AddInput("Genre (1 = Action, 2 = Comedy, 3 = History, 4 = Drama, 5 = Western)", genreValidator, false);
+        addDvdFullMenu.AddInput("Classification (1 = G, 2 = PG, 3 = M, 4 = M15+)", classificationValidator, false);
+        addDvdFullMenu.AddInput("Duration", quantityValidator, false);
+        addDvdFullMenu.AddInput("Copies", quantityValidator, false);
 
         InputMenu addDvdQuantityMenu = addDvdMenu.AddInputMenu("AddDVDsQty", "This movie already exists, what would you like to do?");
         addDvdQuantityMenu.AddInput("Quantity", quantityValidator);
@@ -250,7 +237,25 @@ class Program
                         break;
 
                     case "AddDVDs":
+                        try
+                        {
+                            Handler.ValidateValues(fields, values);
+                        }
+                        catch (Exception e)
+                        {
+                            Handler.PrintErrorMessage(e.Message);
+                            break;
+                        }
+
                         string movieName = values[0];
+
+                        if (movieName == "")
+                        {
+                            Console.WriteLine("Movie name cannot be blank");
+                            Console.WriteLine();
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
 
                         IMovie _addMovie = movieCollection.Search(movieName);
                         IMovie addMovie = (Movie)_addMovie;
@@ -268,6 +273,17 @@ class Program
                         break;
 
                     case "AddDVDsFull":
+                        try
+                        {
+                            Handler.ValidateValues(fields, values);
+                        }
+                        catch (Exception e)
+                        {
+                            Handler.PrintErrorMessage(e.Message);
+                            currentDisplay = staffOptionMenu;
+                            break;
+                        }
+
                         if (movieToAdd == null)
                         {
                             Console.WriteLine("Error");
@@ -276,22 +292,45 @@ class Program
                             break;
                         }
 
-                        string genre = values[0];
-                        string classification = values[1];
-                        string duration = values[2];
-                        string copies = values[3];
+                        string rawGenre = values[0];
+                        string rawClassification = values[1];
+                        string rawDuration = values[2];
+                        string rawCopies = values[3];
 
-                        Movie newMovie = new Movie(movieToAdd, MovieGenre.Action, MovieClassification.G, 140, 100);
-                        movieCollection.Insert(newMovie);
+                        MovieGenre genre = (MovieGenre)int.Parse(rawGenre);
+                        MovieClassification classification = (MovieClassification)int.Parse(rawClassification);
+                        int duration = int.Parse(rawDuration);
+                        int copies = int.Parse(rawCopies);
 
-                        Console.WriteLine("Successfully added {0} to the collection", movieToAdd);
-                        Console.WriteLine();
+                        Movie newMovie = new Movie(movieToAdd, genre, classification, duration, copies);
+                        bool didInsert = movieCollection.Insert(newMovie);
+
+                        if (didInsert)
+                        {
+                            Console.WriteLine("Successfully added {0} to the collection", movieToAdd);
+                            Console.WriteLine();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Could not add {0} to the collection", movieToAdd);
+                            Console.WriteLine();
+                        }
 
                         movieToAdd = null;
                         currentDisplay = staffOptionMenu;
                         break;
 
                     case "AddDVDsQty":
+                        try
+                        {
+                            Handler.ValidateValues(fields, values);
+                        } catch (Exception e)
+                        {
+                            Handler.PrintErrorMessage(e.Message);
+                            currentDisplay = staffOptionMenu;
+                            break;
+                        }
+
                         if (movieToAdd == null)
                         {
                             Console.WriteLine("Error");
@@ -337,6 +376,17 @@ class Program
                         break;
 
                     case "BorrowMovie":
+                        try
+                        {
+                            Handler.ValidateValues(fields, values);
+                        }
+                        catch (Exception e)
+                        {
+                            Handler.PrintErrorMessage(e.Message);
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
                         if (loggedInMember == null)
                         {
                             Console.WriteLine("Error - no logged in user detected");
@@ -378,6 +428,17 @@ class Program
                         break;
 
                     case "ReturnMovie":
+                        try
+                        {
+                            Handler.ValidateValues(fields, values);
+                        }
+                        catch (Exception e)
+                        {
+                            Handler.PrintErrorMessage(e.Message);
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
                         if (loggedInMember == null)
                         {
                             Console.WriteLine("Error - no logged in user detected");
