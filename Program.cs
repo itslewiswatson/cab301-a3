@@ -3,20 +3,27 @@ using System.Collections.Generic;
 
 class Program
 {
+    static MemberCollection memberCollection = new MemberCollection(100);
+    static MovieCollection movieCollection = new MovieCollection();
+
     static void Main()
     {
+        // Global state
+        Member loggedInMember = null;
+
         // ADTs
-        MemberCollection memberCollection = new MemberCollection(100);
-        MovieCollection movieCollection = new MovieCollection();
+
 
         Member lewis = new Member("Lewis", "Watson", "0404925759", "1234");
         Member dennis = new Member("Ron", "Dennis", "0404925759", "1234");
         memberCollection.Add(lewis);
         memberCollection.Add(dennis);
 
-        Movie movie = new Movie("Casino", MovieGenre.Drama, MovieClassification.M15Plus, 200, 10);
+        Movie casino = new Movie("Casino", MovieGenre.Drama, MovieClassification.M15Plus, 200, 10);
+        Movie gf = new Movie("Goodfellas", MovieGenre.Drama, MovieClassification.M15Plus, 210, 250);
         // movie.AddBorrower(lewis);
-        movieCollection.Insert(movie);
+        movieCollection.Insert(casino);
+        movieCollection.Insert(gf);
 
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
@@ -26,6 +33,9 @@ class Program
         DisplayMemberContactHandler displayMemberContactHandler = new DisplayMemberContactHandler(memberCollection, movieCollection);
         DisplayMembersRentingHandler displayMembersRentingHandler = new DisplayMembersRentingHandler(memberCollection, movieCollection);
         RemoveDvdHandler removeDvdHandler = new RemoveDvdHandler(memberCollection, movieCollection);
+        BrowseMoviesHandler browseMoviesHandler = new BrowseMoviesHandler(memberCollection, movieCollection);
+        DisplayMovieInfoHandler displayMovieInfoHandler = new DisplayMovieInfoHandler(memberCollection, movieCollection);
+        TopThreeHandler topThreeHandler = new TopThreeHandler(memberCollection, movieCollection);
 
         // Validators
         PinValidator pinValidator = new PinValidator();
@@ -35,11 +45,7 @@ class Program
         // Menus
         OptionMenu mainMenu = new OptionMenu("Enter a number to select from the list");
 
-        InputMenu staffLoginMenu = mainMenu.AddInputMenu("StaffLogin", "Enter your staff credentials");
-        mainMenu.AddOption("Staff Login", staffLoginMenu);
-        staffLoginMenu.AddInput("Username", new StaffUsernameValidator());
-        staffLoginMenu.AddInput("Password", new StaffPasswordValidator());
-
+        // Member
         InputMenu memberLoginMenu = mainMenu.AddInputMenu("MemberLogin", "Enter your membership credentials");
         mainMenu.AddOption("Member Login", memberLoginMenu);
         memberLoginMenu.AddInput("First Name");
@@ -48,8 +54,35 @@ class Program
 
         OptionMenu memberOptionMenu = new OptionMenu(mainMenu, "Select what you would like to do");
 
+        InputMenu browseMovieMenu = memberOptionMenu.AddInputMenu("BrowseMovies", null);
+        memberOptionMenu.AddOption("Browse all the movies", browseMovieMenu);
+
+        InputMenu displayMovieInfoMenu = memberOptionMenu.AddInputMenu("DisplayMovieInfo", "Display movie info");
+        memberOptionMenu.AddOption("Display all information about a movie, given its title", displayMovieInfoMenu);
+        displayMovieInfoMenu.AddInput("Movie");
+
+        InputMenu borrowMovieMenu = memberOptionMenu.AddInputMenu("BorrowMovie", null);
+        memberOptionMenu.AddOption("Borrow a movie DVD", borrowMovieMenu);
+        borrowMovieMenu.AddInput("Movie");
+
+        InputMenu returnMovieMenu = memberOptionMenu.AddInputMenu("ReturnMovie", null);
+        memberOptionMenu.AddOption("Return a movie DVD", returnMovieMenu);
+        returnMovieMenu.AddInput("Movie");
+
+        InputMenu currentBorrowingMenu = memberOptionMenu.AddInputMenu("CurrentBorrowing", null);
+        memberOptionMenu.AddOption("Return a movie DVD", currentBorrowingMenu);
+
+        InputMenu topThreeMenu = memberOptionMenu.AddInputMenu("Top3", null);
+        memberOptionMenu.AddOption("Display the top 3 movies rented by members", topThreeMenu);
+
         InputMenu memberGoToParentMenu = memberOptionMenu.AddInputMenu("GoToParentMenu", null);
         memberOptionMenu.AddOption("Return to the main menu", memberGoToParentMenu);
+
+        // Staff
+        InputMenu staffLoginMenu = mainMenu.AddInputMenu("StaffLogin", "Enter your staff credentials");
+        mainMenu.AddOption("Staff Login", staffLoginMenu);
+        staffLoginMenu.AddInput("Username", new StaffUsernameValidator());
+        staffLoginMenu.AddInput("Password", new StaffPasswordValidator());
 
         OptionMenu staffOptionMenu = new OptionMenu(mainMenu, "Select what you would like to do");
 
@@ -170,6 +203,10 @@ class Program
                     case "MemberLogin":
                         bool memberLoginSuccess = memberLoginHandler.Handle(fields, values);
                         currentDisplay = memberLoginSuccess ? memberOptionMenu : currentMenu.parentMenu;
+                        if (memberLoginSuccess)
+                        {
+                            loggedInMember = new Member(values[0], values[1]);
+                        }
                         break;
 
                     case "RegisterMember":
@@ -197,6 +234,103 @@ class Program
                         currentDisplay = currentMenu.parentMenu;
                         break;
 
+                    case "BrowseMovies":
+                        browseMoviesHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "DisplayMovieInfo":
+                        displayMovieInfoHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+
+                    case "BorrowMovie":
+                        if (loggedInMember == null)
+                        {
+                            Console.WriteLine("Error - no logged in user detected");
+                            Console.WriteLine();
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        Movie movieToBorrow = FindMovie(values[0]);
+                        if (movieToBorrow == null)
+                        {
+                            Console.WriteLine("The movie '{0}' does not exist in the system", values[0].ToString());
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        bool currentlyBorrowing = movieToBorrow.Borrowers.Search(loggedInMember);
+                        if (currentlyBorrowing)
+                        {
+                            Console.WriteLine("You are already borrowing this DVD");
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        bool isBorrowing = movieToBorrow.AddBorrower(loggedInMember);
+                        if (!isBorrowing)
+                        {
+                            Console.WriteLine("Could not borrow this DVD");
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        Console.WriteLine("You have borrowed a copy of {0}", movieToBorrow.Title.ToString());
+                        Console.WriteLine("");
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "ReturnMovie":
+                        if (loggedInMember == null)
+                        {
+                            Console.WriteLine("Error - no logged in user detected");
+                            Console.WriteLine();
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        Movie movie = FindMovie(values[0]);
+                        if (movie == null)
+                        {
+                            Console.WriteLine("The movie '{0}' does not exist in the system", values[0].ToString());
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        if (!movie.Borrowers.Search(loggedInMember))
+                        {
+                            Console.WriteLine("You are not currently borrowing this DVD");
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        bool returned = movie.RemoveBorrower(loggedInMember);
+                        if (!returned)
+                        {
+                            Console.WriteLine("Could not return this DVD");
+                            Console.WriteLine("");
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        Console.WriteLine("You have returned your copy of {0}", movie.Title.ToString());
+                        Console.WriteLine("");
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "Top3":
+                        topThreeHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
                     default:
                         Console.WriteLine("Something has gone wrong.");
                         Console.WriteLine();
@@ -213,5 +347,10 @@ class Program
         } while (input != null);
 
         Environment.Exit(0);
+    }
+
+    static Movie FindMovie(string movieName)
+    {
+        return (Movie)movieCollection.Search(movieName);
     }
 }

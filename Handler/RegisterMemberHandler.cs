@@ -14,6 +14,13 @@ class RegisterMemberHandler : Handler
         string contactNumber = values[2];
         string pin = values[3];
 
+        if (firstName == "" || lastName == "")
+        {
+            Console.WriteLine("You must enter a valid first and last name");
+            Console.WriteLine("");
+            return false;
+        }
+
         Member newMember = new Member(firstName, lastName, contactNumber, pin);
 
         memberCollection.Add(newMember);
