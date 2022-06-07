@@ -252,7 +252,7 @@ public class MovieCollection : IMovieCollection
 		}
 		else
 		{
-			return Search(movietitle, root.RChild);
+			return Search(movietitle, r.RChild);
 		}
 	}
 

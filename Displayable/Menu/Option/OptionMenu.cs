@@ -20,9 +20,9 @@ class OptionMenu : Menu, Displayable<Option>
         this.parentMenu = null;
     }
 
-    public void AddOption(string displayText, BasicDisplayable childMenu = null)
+    public void AddOption(string displayText, BasicDisplayable childMenu = null, bool hidden = false)
     {
-        Option option = new Option(displayText, childMenu);
+        Option option = new Option(displayText, childMenu, hidden);
         items.Add(option);
     }
 
@@ -46,7 +46,10 @@ class OptionMenu : Menu, Displayable<Option>
         for (var index = 0; index < items.Count; index++)
         {
             Option option = items[index];
-            Console.WriteLine("{0}{1} {2}", index + 1, Option_Separator, option.displayText);
+            if (option.hidden == false)
+            {
+                Console.WriteLine("{0}{1} {2}", index + 1, Option_Separator, option.displayText);
+            }
         }
         Console.WriteLine();
     }

@@ -10,6 +10,7 @@ class Program
     {
         // Global state
         Member loggedInMember = null;
+        string movieToAdd = null;
 
         // ADTs
 
@@ -88,6 +89,25 @@ class Program
 
         InputMenu addDvdMenu = staffOptionMenu.AddInputMenu("AddDVDs", "Add new DVDs of a new movie to the system");
         staffOptionMenu.AddOption("Add new DVDs of a new movie to the system", addDvdMenu);
+        addDvdMenu.AddInput("Movie");
+
+        InputMenu addDvdFullMenu = addDvdMenu.AddInputMenu("AddDVDsFull", "We haven't seen that movie before, let's get some more info");
+        // staffOptionMenu.AddOption("HIDDEN: Add new DVDs of a new movie to the system", addDvdFullMenu, true);
+        addDvdFullMenu.AddInput("Genre");
+        addDvdFullMenu.AddInput("Classification");
+        addDvdFullMenu.AddInput("Duration");
+        addDvdFullMenu.AddInput("Copies");
+
+        InputMenu addDvdQuantityMenu = addDvdMenu.AddInputMenu("AddDVDsQty", "This movie already exists, what would you like to do?");
+        addDvdQuantityMenu.AddInput("Quantity", quantityValidator);
+
+        OptionMenu addDvdNotFoundOption = addDvdMenu.AddOptionMenu("We haven't seen that movie before...");
+        addDvdNotFoundOption.AddOption("Continue to add", addDvdFullMenu);
+        addDvdNotFoundOption.AddOption("Stop, take me back!", staffOptionMenu);
+
+        OptionMenu addDvdFoundOption = addDvdMenu.AddOptionMenu("This movie already exists, what would you like to do?");
+        addDvdFoundOption.AddOption("Specify quantity and continue to add", addDvdQuantityMenu);
+        addDvdFoundOption.AddOption("Stop, take me back!", staffOptionMenu);
 
         InputMenu removeDvdMenu = staffOptionMenu.AddInputMenu("RemoveDVDs", "Remove DVDs of a movie from the system");
         staffOptionMenu.AddOption("Remove DVDs of a movie from the system", removeDvdMenu);
@@ -196,7 +216,7 @@ class Program
                         break;
 
                     case "StaffLogin":
-                        bool staffLoginSuccess = staffLoginHandler.Handle(fields, values);
+                        bool staffLoginSuccess = true; // staffLoginHandler.Handle(fields, values);
                         currentDisplay = staffLoginSuccess ? staffOptionMenu : currentMenu.parentMenu;
                         break;
 
@@ -229,6 +249,78 @@ class Program
                         currentDisplay = currentMenu.parentMenu;
                         break;
 
+                    case "AddDVDs":
+                        string movieName = values[0];
+
+                        IMovie _addMovie = movieCollection.Search(movieName);
+                        IMovie addMovie = (Movie)_addMovie;
+
+                        movieToAdd = movieName;
+
+                        if (addMovie != null)
+                        {
+                            currentDisplay = addDvdFoundOption;
+                            break;
+                        }
+
+                        currentDisplay = addDvdNotFoundOption;
+
+                        break;
+
+                    case "AddDVDsFull":
+                        if (movieToAdd == null)
+                        {
+                            Console.WriteLine("Error");
+                            Console.WriteLine();
+                            currentDisplay = staffOptionMenu;
+                            break;
+                        }
+
+                        string genre = values[0];
+                        string classification = values[1];
+                        string duration = values[2];
+                        string copies = values[3];
+
+                        Movie newMovie = new Movie(movieToAdd, MovieGenre.Action, MovieClassification.G, 140, 100);
+                        movieCollection.Insert(newMovie);
+
+                        Console.WriteLine("Successfully added {0} to the collection", movieToAdd);
+                        Console.WriteLine();
+
+                        movieToAdd = null;
+                        currentDisplay = staffOptionMenu;
+                        break;
+
+                    case "AddDVDsQty":
+                        if (movieToAdd == null)
+                        {
+                            Console.WriteLine("Error");
+                            Console.WriteLine();
+                            currentDisplay = staffOptionMenu;
+                            break;
+                        }
+
+                        string _qtyToAdd = values[0];
+                        int qtyToAdd = int.Parse(_qtyToAdd);
+
+                        Movie existingMovie = (Movie)movieCollection.Search(movieToAdd);
+                        if (existingMovie == null)
+                        {
+                            Console.WriteLine("Error");
+                            Console.WriteLine();
+                            movieToAdd = null;
+                            break;
+                        }
+
+                        existingMovie.TotalCopies = existingMovie.TotalCopies + qtyToAdd;
+
+                        Console.WriteLine("There are now {0} available copies", existingMovie.TotalCopies.ToString());
+                        Console.WriteLine();
+
+                        movieToAdd = null;
+                        currentDisplay = staffOptionMenu;
+                        break;
+
                     case "RemoveDVDs":
                         removeDvdHandler.Handle(fields, values);
                         currentDisplay = currentMenu.parentMenu;
@@ -243,7 +335,6 @@ class Program
                         displayMovieInfoHandler.Handle(fields, values);
                         currentDisplay = currentMenu.parentMenu;
                         break;
-
 
                     case "BorrowMovie":
                         if (loggedInMember == null)

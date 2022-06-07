@@ -1,4 +1,6 @@
 ﻿class Option : MenuField
 {
-    public Option(string displayText, BasicDisplayable childMenu = null) : base(displayText, childMenu) { }
+    public bool hidden { get; }
+
+    public Option(string displayText, BasicDisplayable childMenu = null, bool hidden = false) : base(displayText, childMenu) { }
 }
