@@ -353,7 +353,7 @@ class Program
 
                         existingMovie.TotalCopies = existingMovie.TotalCopies + qtyToAdd;
 
-                        Console.WriteLine("There are now {0} available copies", existingMovie.TotalCopies.ToString());
+                        Console.WriteLine("There are now {0} total copies ({1} available)", existingMovie.TotalCopies.ToString(), existingMovie.AvailableCopies.ToString());
                         Console.WriteLine();
 
                         movieToAdd = null;
