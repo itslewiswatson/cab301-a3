@@ -203,7 +203,7 @@ class Program
                         break;
 
                     case "StaffLogin":
-                        bool staffLoginSuccess = true; // staffLoginHandler.Handle(fields, values);
+                        bool staffLoginSuccess = staffLoginHandler.Handle(fields, values);
                         currentDisplay = staffLoginSuccess ? staffOptionMenu : currentMenu.parentMenu;
                         break;
 
