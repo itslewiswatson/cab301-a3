@@ -20,7 +20,8 @@ class DisplayMembersRentingHandler : Handler
         }
 
         Console.WriteLine("List of members borrowing {0}:", movieName);
-        Console.WriteLine(movie.Borrowers.ToString());
+        Console.Write(movie.Borrowers.ToString());
+        Console.WriteLine();
 
         return true;
     }

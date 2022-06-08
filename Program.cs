@@ -12,6 +12,26 @@ class Program
         Member loggedInMember = null;
         string movieToAdd = null;
 
+        // Test data, please ignore
+        /*
+        Member lewis = new Member("Lewis", "Watson", "0404925759", "1234");
+        Member grant = new Member("Grant", "Smith", "0404925759", "1234");
+        Member kanye = new Member("Kanye", "West", "0404925759", "1234");
+        memberCollection.Add(lewis);
+        memberCollection.Add(grant);
+        memberCollection.Add(kanye);
+
+        Movie gf = new Movie("Goodfellas", MovieGenre.Action, MovieClassification.G, 100, 10);
+        Movie cas = new Movie("Casino", MovieGenre.Action, MovieClassification.G, 100, 10);
+        cas.AddBorrower(lewis);
+        cas.AddBorrower(grant);
+        cas.AddBorrower(kanye);
+        movieCollection.Insert(gf);
+        movieCollection.Insert(cas);
+        lewis.Movies.Insert(gf);
+        lewis.Movies.Insert(cas);
+        */
+
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
         RegisterMemberHandler registerMemberHandler = new RegisterMemberHandler(memberCollection, movieCollection);
@@ -59,7 +79,7 @@ class Program
         returnMovieMenu.AddInput("Movie");
 
         InputMenu currentBorrowingMenu = memberOptionMenu.AddInputMenu("CurrentBorrowing", null);
-        memberOptionMenu.AddOption("Return a movie DVD", currentBorrowingMenu);
+        memberOptionMenu.AddOption("List current borrowing movies", currentBorrowingMenu);
 
         InputMenu topThreeMenu = memberOptionMenu.AddInputMenu("Top3", null);
         memberOptionMenu.AddOption("Display the top 3 movies rented by members", topThreeMenu);
@@ -212,7 +232,7 @@ class Program
                         currentDisplay = memberLoginSuccess ? memberOptionMenu : currentMenu.parentMenu;
                         if (memberLoginSuccess)
                         {
-                            loggedInMember = new Member(values[0], values[1]);
+                            loggedInMember = (Member)memberCollection.Find(new Member(values[0], values[1]));
                         }
                         break;
 
@@ -372,6 +392,25 @@ class Program
 
                     case "DisplayMovieInfo":
                         displayMovieInfoHandler.Handle(fields, values);
+                        currentDisplay = currentMenu.parentMenu;
+                        break;
+
+                    case "CurrentBorrowing":
+                        if (loggedInMember == null)
+                        {
+                            Console.WriteLine("Error");
+                            Console.WriteLine();
+                            currentDisplay = currentMenu.parentMenu;
+                            break;
+                        }
+
+                        Console.WriteLine("Movies currently being borrowed by member:");
+                        IMovie[] moviesBorrowed = loggedInMember.Movies.ToArray();
+                        for (int i = 0; i < moviesBorrowed.Length; i++)
+                        {
+                            Console.WriteLine("- {0}", moviesBorrowed[i].Title);
+                        }
+                        Console.WriteLine();
                         currentDisplay = currentMenu.parentMenu;
                         break;
 
