@@ -23,15 +23,16 @@ class Program
 
         Movie gf = new Movie("Goodfellas", MovieGenre.Action, MovieClassification.G, 100, 10);
         Movie cas = new Movie("Casino", MovieGenre.Action, MovieClassification.G, 100, 10);
+        gf.AddBorrower(kanye);
+        gf.AddBorrower(grant);
         cas.AddBorrower(lewis);
         cas.AddBorrower(grant);
         cas.AddBorrower(kanye);
         movieCollection.Insert(gf);
         movieCollection.Insert(cas);
-        lewis.Movies.Insert(gf);
         lewis.Movies.Insert(cas);
         */
-
+        
         // Handlers
         StaffLoginHandler staffLoginHandler = new StaffLoginHandler(memberCollection, movieCollection);
         RegisterMemberHandler registerMemberHandler = new RegisterMemberHandler(memberCollection, movieCollection);
@@ -460,6 +461,7 @@ class Program
                             currentDisplay = currentMenu.parentMenu;
                             break;
                         }
+                        loggedInMember.Movies.Insert(movieToBorrow);
 
                         Console.WriteLine("You have borrowed a copy of {0}", movieToBorrow.Title.ToString());
                         Console.WriteLine("");
@@ -512,6 +514,7 @@ class Program
                             break;
                         }
 
+                        loggedInMember.Movies.Delete(movie);
                         Console.WriteLine("You have returned your copy of {0}", movie.Title.ToString());
                         Console.WriteLine("");
                         currentDisplay = currentMenu.parentMenu;
